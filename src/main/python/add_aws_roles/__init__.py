@@ -1,28 +1,10 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""
-Create a any new roles given on the command line without any permissions set.
-The Script uses the boto credentials or asks for if the option is given.
-
-Usage:
-    add_machine_roles [--ask-credentials] [--roleprefix=PREFIX]
-                      [--trusted-arn=ARN] ROLE...
-
-Options:
-  -h --help            Show this
-  --ask-credentials    Ask for Credentials
-  --roleprefix=PREFIX  Optional Prefix for roles
-  --trusted-arn=ARN    arn of the role / user allowed to assume these roles
-                       Example: arn:aws:iam::123456789:user/some-user
-"""
 
 import boto
 import sys
 import json
 from requests.utils import unquote
-
-from docopt import docopt
 
 
 def _boto_connect(access_key_id, secret_access_key):
@@ -119,21 +101,3 @@ class RoleAdder(object):
             self.message(full_role, 'Added trust Relationship')
 
 
-def main():
-    """Main function for script execution"""
-    arguments = docopt(__doc__)
-    arguments['--roleprefix'] = arguments['--roleprefix'] or ""
-    access_key_id = secret_access_key = None
-    if arguments['--ask-credentials']:
-        access_key_id, secret_access_key = _get_credentials()
-
-    role_adder = RoleAdder(
-        arguments['ROLE'],
-        arguments['--roleprefix'],
-        arguments['--trusted-arn'],
-        access_key_id, secret_access_key
-        )
-    role_adder.add_roles()
-
-if __name__ == '__main__':
-    main()
