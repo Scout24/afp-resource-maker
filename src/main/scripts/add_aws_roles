@@ -18,9 +18,11 @@ Options:
                        Example: arn:aws:iam::123456789:user/some-user
 """
 
-from add_aws_roles import _get_credentials, RoleAdder
+import sys
 
 from docopt import docopt
+
+from add_aws_roles import _get_credentials, RoleAdder, CanNotContinueException
 
 
 def main():
@@ -31,13 +33,17 @@ def main():
     if arguments['--ask-credentials']:
         access_key_id, secret_access_key = _get_credentials()
 
-    role_adder = RoleAdder(
-        arguments['ROLE'],
-        arguments['--roleprefix'],
-        arguments['--trusted-arn'],
-        access_key_id, secret_access_key
-        )
-    role_adder.add_roles()
+    try:
+        role_adder = RoleAdder(
+            arguments['ROLE'],
+            arguments['--roleprefix'],
+            arguments['--trusted-arn'],
+            access_key_id, secret_access_key
+            )
+        role_adder.add_roles()
+    except CanNotContinueException as e:
+        print >> sys.stderr, e
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()

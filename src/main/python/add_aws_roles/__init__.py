@@ -2,9 +2,13 @@
 
 
 import boto
-import sys
 import json
 from requests.utils import unquote
+
+
+class CanNotContinueException(Exception):
+    """ Signify that the program can not continue. """
+    pass
 
 
 def _boto_connect(access_key_id, secret_access_key):
@@ -13,8 +17,7 @@ def _boto_connect(access_key_id, secret_access_key):
             aws_access_key_id=access_key_id,
             aws_secret_access_key=secret_access_key)
     except boto.exception.NoAuthHandlerFound, exc:
-        print >> sys.stderr, exc
-        sys.exit(1)
+        raise CanNotContinueException(exc)
 
 
 def _get_credentials():
@@ -59,8 +62,7 @@ class RoleAdder(object):
             intro=intro,
             role=role,
             message=message)
-        print >> sys.stderr, error
-        sys.exit(1)
+        raise CanNotContinueException(error)
 
     def add_roles(self):
         for role in self.roles:
