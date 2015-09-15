@@ -74,6 +74,25 @@ class TestAddingRoles(unittest.TestCase):
         self.role_adder.add_role('devfoo')
         message_mock.assert_called_once_with('devfoo', 'Already exists')
 
+    def test_add_role_should_raise_exception_on_limit_exceeded(self):
+
+        self.mock_boto_connection.create_role.side_effect = \
+                [boto.exception.BotoServerError('', '', {'Error': {"Code": "LimitExceeded"}})]
+        self.assertRaises(CanNotContinueException, self.role_adder.add_role, 'devfoo')
+
+    def test_add_role_should_raise_exception_on_incorrect_permissions(self):
+
+        self.mock_boto_connection.create_role.side_effect = \
+                [boto.exception.BotoServerError('', '', {'Error': {"Code": "InvalidClientTokenId"}})]
+        self.assertRaises(CanNotContinueException, self.role_adder.add_role, 'devfoo')
+
+    def test_add_role_should_raise_exception_on_other_exceptions(self):
+
+        self.mock_boto_connection.create_role.side_effect = \
+                [boto.exception.BotoServerError('', '', '')]
+        self.assertRaises(CanNotContinueException, self.role_adder.add_role, 'devfoo')
+
+
     def test_add_trust_relationship_should_call_boto_update_assume_role_policy(self):
         self.role_adder.add_trust_relationship('devfoo')
         self.mock_boto_connection.update_assume_role_policy.assert_called_once_with('devfoo', ANY)
