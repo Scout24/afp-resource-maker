@@ -1,7 +1,9 @@
 import unittest2 as unittest
-from mock import patch, Mock
+from mock import patch, Mock, ANY
 
-from add_aws_roles import RoleAdder
+import boto
+
+from add_aws_roles import RoleAdder, CanNotContinueException
 
 
 class TestRoleAdder(unittest.TestCase):
@@ -60,6 +62,18 @@ class TestAddingRoles(unittest.TestCase):
             secret_access_key,
         )
 
-    def test_add_role_should_call(self):
+    def test_add_role_should_call_boto_create_role(self):
         self.role_adder.add_role('devfoo')
         self.mock_boto_connection.create_role.assert_called_once_with('devfoo')
+
+    @patch('add_aws_roles.RoleAdder.message')
+    def test_add_role_should_handle_existing_role(self, message_mock):
+
+        self.mock_boto_connection.create_role.side_effect = \
+                [boto.exception.BotoServerError('', '', {'Error': {"Code": "EntityAlreadyExists"}})]
+        self.role_adder.add_role('devfoo')
+        message_mock.assert_called_once_with('devfoo', 'Already exists')
+
+    def test_add_trust_relationship_should_call_boto_update_assume_role_policy(self):
+        self.role_adder.add_trust_relationship('devfoo')
+        self.mock_boto_connection.update_assume_role_policy.assert_called_once_with('devfoo', ANY)
