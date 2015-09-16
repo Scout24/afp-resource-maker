@@ -54,17 +54,19 @@ class TestRoleAdder(unittest.TestCase):
         boto_connect_mock.assert_called_once_with(None, None)
 
     @patch('add_aws_roles._boto_connect')
-    def test_initialization_of_role_adder_with_aws_credentials(self, boto_connect_mock):
+    def test_init_of_role_adder_with_aws_credentials(self, boto_connect_mock):
         access_key_id = 'access_key_id'
         secret_access_key = 'secret_access_key'
-        role_adder = RoleAdder(
+        RoleAdder(
             self.roles,
             self.prefix,
             self.trusted_arn,
             access_key_id,
             secret_access_key,
         )
-        boto_connect_mock.assert_called_once_with('access_key_id', 'secret_access_key')
+        boto_connect_mock.assert_called_once_with(
+            'access_key_id',
+            'secret_access_key')
 
 
 class TestAddingRoles(unittest.TestCase):
@@ -94,29 +96,42 @@ class TestAddingRoles(unittest.TestCase):
     def test_add_role_should_handle_existing_role(self, message_mock):
 
         self.mock_boto_connection.create_role.side_effect = \
-                [boto.exception.BotoServerError('', '', {'Error': {"Code": "EntityAlreadyExists"}})]
+            [boto.exception.BotoServerError(
+                '', '',
+                {'Error': {"Code": "EntityAlreadyExists"}})]
         self.role_adder.add_role('devfoo')
         message_mock.assert_called_once_with('devfoo', 'Already exists')
 
     def test_add_role_should_raise_exception_on_limit_exceeded(self):
 
         self.mock_boto_connection.create_role.side_effect = \
-                [boto.exception.BotoServerError('', '', {'Error': {"Code": "LimitExceeded"}})]
-        self.assertRaises(CanNotContinueException, self.role_adder.add_role, 'devfoo')
+            [boto.exception.BotoServerError(
+                '', '',
+                {'Error': {"Code": "LimitExceeded"}})]
+        self.assertRaises(CanNotContinueException,
+                          self.role_adder.add_role,
+                          'devfoo')
 
     def test_add_role_should_raise_exception_on_incorrect_permissions(self):
 
         self.mock_boto_connection.create_role.side_effect = \
-                [boto.exception.BotoServerError('', '', {'Error': {"Code": "InvalidClientTokenId"}})]
-        self.assertRaises(CanNotContinueException, self.role_adder.add_role, 'devfoo')
+            [boto.exception.BotoServerError(
+                '',
+                '',
+                {'Error': {"Code": "InvalidClientTokenId"}})]
+        self.assertRaises(CanNotContinueException,
+                          self.role_adder.add_role,
+                          'devfoo')
 
     def test_add_role_should_raise_exception_on_other_exceptions(self):
 
         self.mock_boto_connection.create_role.side_effect = \
-                [boto.exception.BotoServerError('', '', '')]
-        self.assertRaises(CanNotContinueException, self.role_adder.add_role, 'devfoo')
+            [boto.exception.BotoServerError('', '', '')]
+        self.assertRaises(CanNotContinueException,
+                          self.role_adder.add_role,
+                          'devfoo')
 
-
-    def test_add_trust_relationship_should_call_boto_update_assume_role_policy(self):
+    def test_add_trust_relationship_shld_call_update_assume_role_policy(self):
         self.role_adder.add_trust_relationship('devfoo')
-        self.mock_boto_connection.update_assume_role_policy.assert_called_once_with('devfoo', ANY)
+        self.mock_boto_connection.update_assume_role_policy.\
+            assert_called_once_with('devfoo', ANY)
