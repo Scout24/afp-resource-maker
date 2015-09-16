@@ -6,6 +6,7 @@ import boto
 
 from add_aws_roles import (RoleAdder,
                            CanNotContinueException,
+                           AlreadyExistsException,
                            _get_credentials,
                            )
 
@@ -105,38 +106,36 @@ class TestAddingRoles(unittest.TestCase):
         self.role_adder.add_role('devfoo')
         self.mock_boto_connection.create_role.assert_called_once_with('devfoo')
 
-    @patch('add_aws_roles.RoleAdder.message')
-    def test_add_role_should_handle_existing_role(self, message_mock):
-
+    def test_add_role_should_handle_existing_role(self):
         self.mock_boto_connection.create_role.side_effect = \
             [boto.exception.BotoServerError('', '', {'Error': {"Code": "EntityAlreadyExists"}})]
-        self.role_adder.add_role('devfoo')
-        message_mock.assert_called_once_with('devfoo', 'Already exists')
+        self.assertRaises(AlreadyExistsException, self.role_adder.add_role, 'devfoo')
 
     def test_add_role_should_raise_exception_on_limit_exceeded(self):
-
         self.mock_boto_connection.create_role.side_effect = \
             [boto.exception.BotoServerError('', '', {'Error': {"Code": "LimitExceeded"}})]
         self.assertRaises(CanNotContinueException, self.role_adder.add_role, 'devfoo')
 
     def test_add_role_should_raise_exception_on_incorrect_permissions(self):
-
         self.mock_boto_connection.create_role.side_effect = \
             [boto.exception.BotoServerError('', '', {'Error': {"Code": "InvalidClientTokenId"}})]
         self.assertRaises(CanNotContinueException, self.role_adder.add_role, 'devfoo')
 
     def test_add_role_should_raise_exception_on_other_exceptions(self):
-
         self.mock_boto_connection.create_role.side_effect = \
             [boto.exception.BotoServerError('', '', '')]
         self.assertRaises(CanNotContinueException, self.role_adder.add_role, 'devfoo')
 
-    def test_add_trust_relationship_shld_call_update_assume_role_policy(self):
+    @patch('add_aws_roles.RoleAdder.check_role_policy')
+    def test_add_trust_relationship_should_call_update_assume_role_policy(self, mock_check_role_policy):
+        mock_check_role_policy.return_value = False
         self.role_adder.add_trust_relationship('devfoo')
         self.mock_boto_connection.update_assume_role_policy.\
             assert_called_once_with('devfoo', ANY)
 
-    def test_add_trust_relationship_should_throw_exception_on_error(self):
+    @patch('add_aws_roles.RoleAdder.check_role_policy')
+    def test_add_trust_relationship_should_throw_exception_on_error(self, mock_check_role_policy):
+        mock_check_role_policy.return_value = False
         self.mock_boto_connection.update_assume_role_policy.side_effect = \
             [boto.exception.BotoServerError('', '', {'Error': {"Code": "InvalidClientTokenId"}})]
         self.assertRaises(CanNotContinueException,
@@ -172,3 +171,31 @@ class TestAddingRoles(unittest.TestCase):
         }
         self.mock_boto_connection.get_role.return_value = boto_return_value
         self.assertFalse(self.role_adder.check_role_policy('devfoo'))
+
+    @patch('add_aws_roles.RoleAdder.message')
+    @patch('add_aws_roles.RoleAdder.check_role_policy')
+    def test_add_roles_should_call_message_new_role(self, mock_check_role_policy, mock_message):
+        mock_check_role_policy.return_value = False
+        self.role_adder.add_roles()
+        mock_message.assert_any_call('rz_devbar', 'created and relationship created')
+        mock_message.assert_any_call('rz_devfoo', 'created and relationship created')
+
+    @patch('add_aws_roles.RoleAdder.message')
+    @patch('add_aws_roles.RoleAdder.check_role_policy')
+    def test_add_roles_should_call_message_existing_role_new_relationship(self, mock_check_role_policy, mock_message):
+        self.mock_boto_connection.create_role.side_effect = \
+            [boto.exception.BotoServerError('', '', {'Error': {"Code": "EntityAlreadyExists"}})] * 2
+        mock_check_role_policy.return_value = False
+        self.role_adder.add_roles()
+        mock_message.assert_any_call('rz_devbar', 'exists  and relationship created')
+        mock_message.assert_any_call('rz_devfoo', 'exists  and relationship created')
+
+    @patch('add_aws_roles.RoleAdder.message')
+    @patch('add_aws_roles.RoleAdder.check_role_policy')
+    def test_add_roles_should_call_message_existing_role_and_relationship(self, mock_check_role_policy, mock_message):
+        self.mock_boto_connection.create_role.side_effect = \
+            [boto.exception.BotoServerError('', '', {'Error': {"Code": "EntityAlreadyExists"}})] * 2
+        mock_check_role_policy.return_value = True
+        self.role_adder.add_roles()
+        mock_message.assert_any_call('rz_devbar', 'exists  and relationship exists ')
+        mock_message.assert_any_call('rz_devfoo', 'exists  and relationship exists ')

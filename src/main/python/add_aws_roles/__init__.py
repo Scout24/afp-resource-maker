@@ -11,6 +11,11 @@ class CanNotContinueException(Exception):
     pass
 
 
+class AlreadyExistsException(Exception):
+    """ Signify that the entity already exists. """
+    pass
+
+
 def _boto_connect(access_key_id, secret_access_key):
     try:
         return boto.connect_iam(
@@ -67,22 +72,33 @@ class RoleAdder(object):
     def add_roles(self):
         for role in self.roles:
             full_role = self.prefix + role
-            self.add_role(full_role)
-            if self.trusted_arn and not self.check_role_policy(full_role):
-                self.add_trust_relationship(full_role)
+            role_message = ""
+            try:
+                self.add_role(full_role)
+            except AlreadyExistsException:
+                role_message += "exists "
+            else:
+                role_message += "created"
+            if self.trusted_arn:
+                role_message += " and "
+                try:
+                    self.add_trust_relationship(full_role)
+                except AlreadyExistsException:
+                    role_message += "relationship exists "
+                else:
+                    role_message += "relationship created"
+            self.message(full_role, role_message)
 
     def add_role(self, full_role):
         try:
             self.boto_connection.create_role(full_role)
         except boto.exception.BotoServerError, exc:
             if exc.error_code == "EntityAlreadyExists":
-                self.message(full_role, 'Already exists')
+                raise AlreadyExistsException()
             elif exc.error_code in ("LimitExceeded", "InvalidClientTokenId"):
                 self.die(full_role, exc.message)
             else:
                 self.die(full_role, exc)
-        else:
-            self.message(full_role, 'Created')
 
     def check_role_policy(self, full_role):
         aws_role = self.boto_connection.get_role(full_role)['get_role_response']['get_role_result']['role']
@@ -91,6 +107,8 @@ class RoleAdder(object):
         return assume_role_policy_document == self.trust_policy
 
     def add_trust_relationship(self, full_role):
+        if self.check_role_policy(full_role):
+            raise AlreadyExistsException()
         try:
             self.boto_connection.update_assume_role_policy(
                 full_role,
@@ -99,5 +117,3 @@ class RoleAdder(object):
             self.die(
                 full_role,
                 "Cannot add trust relationship to role: %s" % exc.message)
-        else:
-            self.message(full_role, 'Added trust Relationship')
