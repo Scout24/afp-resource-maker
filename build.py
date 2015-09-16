@@ -18,8 +18,9 @@ default_task = "publish"
 def set_properties(project):
     project.build_depends_on("unittest2")
     project.build_depends_on("mock")
-    project.build_depends_on("boto")
-    project.build_depends_on("requests")
+    project.depends_on("boto")
+    project.depends_on("requests")
+    project.depends_on("docopt")
     project.set_property('flake8_include_test_sources', True)
     project.set_property('flake8_break_build', True)
 
