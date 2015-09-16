@@ -1,6 +1,7 @@
 import unittest2 as unittest
 from mock import patch, Mock, ANY
-
+from requests.utils import quote
+import json
 import boto
 
 from add_aws_roles import (RoleAdder,
@@ -78,6 +79,18 @@ class TestAddingRoles(unittest.TestCase):
         self.roles = ['devfoo', 'devbar']
         self.prefix = 'rz_'
         self.trusted_arn = 'arn:test'
+        self.policy = {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Sid": "",
+                    "Effect": "Allow",
+                    "Principal": {
+                        "AWS": self.trusted_arn
+                    },
+                    "Action": "sts:AssumeRole"
+                }
+            ]}
         access_key_id = None
         secret_access_key = None
         self.role_adder = RoleAdder(
@@ -96,40 +109,27 @@ class TestAddingRoles(unittest.TestCase):
     def test_add_role_should_handle_existing_role(self, message_mock):
 
         self.mock_boto_connection.create_role.side_effect = \
-            [boto.exception.BotoServerError(
-                '', '',
-                {'Error': {"Code": "EntityAlreadyExists"}})]
+            [boto.exception.BotoServerError('', '', {'Error': {"Code": "EntityAlreadyExists"}})]
         self.role_adder.add_role('devfoo')
         message_mock.assert_called_once_with('devfoo', 'Already exists')
 
     def test_add_role_should_raise_exception_on_limit_exceeded(self):
 
         self.mock_boto_connection.create_role.side_effect = \
-            [boto.exception.BotoServerError(
-                '', '',
-                {'Error': {"Code": "LimitExceeded"}})]
-        self.assertRaises(CanNotContinueException,
-                          self.role_adder.add_role,
-                          'devfoo')
+            [boto.exception.BotoServerError('', '', {'Error': {"Code": "LimitExceeded"}})]
+        self.assertRaises(CanNotContinueException, self.role_adder.add_role, 'devfoo')
 
     def test_add_role_should_raise_exception_on_incorrect_permissions(self):
 
         self.mock_boto_connection.create_role.side_effect = \
-            [boto.exception.BotoServerError(
-                '',
-                '',
-                {'Error': {"Code": "InvalidClientTokenId"}})]
-        self.assertRaises(CanNotContinueException,
-                          self.role_adder.add_role,
-                          'devfoo')
+            [boto.exception.BotoServerError('', '', {'Error': {"Code": "InvalidClientTokenId"}})]
+        self.assertRaises(CanNotContinueException, self.role_adder.add_role, 'devfoo')
 
     def test_add_role_should_raise_exception_on_other_exceptions(self):
 
         self.mock_boto_connection.create_role.side_effect = \
             [boto.exception.BotoServerError('', '', '')]
-        self.assertRaises(CanNotContinueException,
-                          self.role_adder.add_role,
-                          'devfoo')
+        self.assertRaises(CanNotContinueException, self.role_adder.add_role, 'devfoo')
 
     def test_add_trust_relationship_shld_call_update_assume_role_policy(self):
         self.role_adder.add_trust_relationship('devfoo')
@@ -138,10 +138,37 @@ class TestAddingRoles(unittest.TestCase):
 
     def test_add_trust_relationship_should_throw_exception_on_error(self):
         self.mock_boto_connection.update_assume_role_policy.side_effect = \
-            [boto.exception.BotoServerError(
-                '',
-                '',
-                {'Error': {"Code": "InvalidClientTokenId"}})]
+            [boto.exception.BotoServerError('', '', {'Error': {"Code": "InvalidClientTokenId"}})]
         self.assertRaises(CanNotContinueException,
                           self.role_adder.add_trust_relationship,
                           'devfoo')
+
+    def test_check_role_policy_should_return_true_on_already_set_policy(self):
+        assume_role_policy_doc = quote(
+            json.dumps(self.policy))
+        boto_return_value = {
+            'get_role_response': {
+                'get_role_result': {
+                    'role': {
+                        'assume_role_policy_document': assume_role_policy_doc,
+                    }
+                },
+            }
+        }
+        self.mock_boto_connection.get_role.return_value = boto_return_value
+        self.assertTrue(self.role_adder.check_role_policy('devfoo'))
+
+    def test_check_role_policy_should_return_false_on_no_policy(self):
+        assume_role_policy_doc = quote(
+            json.dumps({}))
+        boto_return_value = {
+            'get_role_response': {
+                'get_role_result': {
+                    'role': {
+                        'assume_role_policy_document': assume_role_policy_doc,
+                    }
+                },
+            }
+        }
+        self.mock_boto_connection.get_role.return_value = boto_return_value
+        self.assertFalse(self.role_adder.check_role_policy('devfoo'))
