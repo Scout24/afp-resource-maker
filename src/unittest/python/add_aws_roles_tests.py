@@ -3,7 +3,31 @@ from mock import patch, Mock, ANY
 
 import boto
 
-from add_aws_roles import RoleAdder, CanNotContinueException
+from add_aws_roles import (RoleAdder,
+                           CanNotContinueException,
+                           _get_credentials,
+                           )
+
+
+class TestGetCredentials(unittest.TestCase):
+
+    @patch('__builtin__.raw_input')
+    def test_should_return_none_none(self, raw_input_mock):
+        raw_input_mock.return_value = ''
+        received = _get_credentials()
+        self.assertEqual(received, (None, None))
+
+    @patch('__builtin__.raw_input')
+    def test_should_return_value_none(self, raw_input_mock):
+        raw_input_mock.side_effect = ['XXYYZZ', '']
+        received = _get_credentials()
+        self.assertEqual(received, ('XXYYZZ', None))
+
+    @patch('__builtin__.raw_input')
+    def test_should_return_value_value(self, raw_input_mock):
+        raw_input_mock.side_effect = ['XXYYZZ', 'AABBCC']
+        received = _get_credentials()
+        self.assertEqual(received, ('XXYYZZ', 'AABBCC'))
 
 
 class TestRoleAdder(unittest.TestCase):
