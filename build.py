@@ -9,9 +9,21 @@ use_plugin("python.distutils")
 
 
 name = "add_aws_roles"
+url = 'https://github.com/ImmobilienScout24/add_aws_roles'
+license = 'Apache License 2.0'
 default_task = "publish"
 
 
 @init
 def set_properties(project):
-    pass
+    project.build_depends_on("unittest2")
+    project.build_depends_on("mock")
+    project.build_depends_on("boto")
+    project.build_depends_on("requests")
+    project.set_property('flake8_include_test_sources', True)
+    project.set_property('flake8_break_build', True)
+
+
+@init(environments='teamcity')
+def set_properties_for_teamcity_builds(project):
+    project.set_property('teamcity_output', True)
