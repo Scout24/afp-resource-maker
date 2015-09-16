@@ -97,9 +97,7 @@ class RoleAdder(object):
                 json.dumps(self.trust_policy))
         except boto.exception.BotoServerError, exc:
             self.die(
-                full_role, exc.message,
-                "Cannot add trust relationship to role")
+                full_role,
+                "Cannot add trust relationship to role: %s" % exc.message)
         else:
             self.message(full_role, 'Added trust Relationship')
-
-
