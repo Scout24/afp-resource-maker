@@ -135,3 +135,13 @@ class TestAddingRoles(unittest.TestCase):
         self.role_adder.add_trust_relationship('devfoo')
         self.mock_boto_connection.update_assume_role_policy.\
             assert_called_once_with('devfoo', ANY)
+
+    def test_add_trust_relationship_should_throw_exception_on_error(self):
+        self.mock_boto_connection.update_assume_role_policy.side_effect = \
+            [boto.exception.BotoServerError(
+                '',
+                '',
+                {'Error': {"Code": "InvalidClientTokenId"}})]
+        self.assertRaises(CanNotContinueException,
+                          self.role_adder.add_trust_relationship,
+                          'devfoo')
