@@ -1,28 +1,48 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import json
+import traceback
+
+import boto
+
 
 class LimitExceededException(Exception):
-    """ Signify that the program can not continue. """
     pass
 
 
 class AWSErrorException(Exception):
-    """ Signify that the program can not continue. """
     pass
 
 
-class AlreadyExistsException(Exception):
-    """ Signify that the entity already exists. """
+class CanNotContinueException(Exception):
+    pass
+
+
+class InvalidClientTokenIdException(Exception):
     pass
 
 
 class RoleMaker(object):
-    def __init__(self,configuration):
-        pass
+    """Create a role with policies to allow cross account operations"""
 
-    def _boto_connect(access_key_id, secret_access_key):
-        pass
+    def __init__(self, configuration):
+        self.configuration = configuration
+        self.prefix = configuration['aws']['role']['prefix']
+        self.trust_policy_document = \
+            configuration['aws']['role']['trust_policy_document']
+        self.boto_connection = None
+        access_key_id = configuration['aws']['access_key_id']
+        secret_access_key = configuration['aws']['secret_access_key']
+        self._boto_connect(access_key_id, secret_access_key)
+
+    def _boto_connect(self, access_key_id, secret_access_key):
+        try:
+            self.boto_connection = boto.connect_iam(
+                aws_access_key_id=access_key_id,
+                aws_secret_access_key=secret_access_key)
+        except boto.exception.NoAuthHandlerFound, exc:
+            raise CanNotContinueException(exc)
 
     def add_policy(self, role_name):
         """Add policy document to given role"""
@@ -30,11 +50,28 @@ class RoleMaker(object):
 
     def add_trust_relationship(self, role_name):
         """Add trust relationship to given role"""
-        pass
+        try:
+            self.boto_connection.update_assume_role_policy(
+                role_name,
+                json.dumps(self.trust_policy))
+        except boto.exception.BotoServerError as exc:
+            message = "Cannot add trust relationship to role: %s" % exc.message
+            raise CanNotContinueException(message)
 
     def create_role(self, role_name):
         """Add Role to AWS"""
-        pass
+        try:
+            self.boto_connection.create_role(role_name)
+        except boto.exception.BotoServerError as exc:
+            message = "Failed to create role: '{0}'".format(role_name)
+            if exc.error_code == "EntityAlreadyExists":
+                return
+            elif exc.error_code == "LimitExceeded":
+                raise LimitExceededException(message)
+            elif exc.error_code == "InvalidClientTokenId":
+                raise InvalidClientTokenIdException(message)
+            else:
+                raise CanNotContinueException(traceback.format_exc())
 
     def put_role(self, role_name):
         """Generate Role with Trust relationship and policy"""
