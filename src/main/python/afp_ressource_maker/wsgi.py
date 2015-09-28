@@ -5,7 +5,7 @@ from bottle import route, default_app
 
 
 @route('/role/<rolename>')
-def make_role(role):
+def make_role(rolename):
     """Create a role and assign needed policies and trusted entities"""
     pass
 

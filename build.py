@@ -20,6 +20,7 @@ def set_properties(project):
     project.build_depends_on('mock')
     project.build_depends_on('webtest')
     project.depends_on('boto')
+    project.depends_on('bottle')
     project.depends_on('requests')
     project.depends_on('docopt')
     project.set_property('flake8_include_test_sources', True)
