@@ -26,7 +26,6 @@ class RoleMaker(object):
     """Create a role with policies to allow cross account operations"""
 
     def __init__(self, configuration):
-        self.configuration = configuration
         self.prefix = configuration['aws']['role']['prefix']
         self.trust_policy_document = \
             configuration['aws']['role']['trust_policy_document']
