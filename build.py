@@ -8,10 +8,10 @@ use_plugin("python.coverage")
 use_plugin("python.distutils")
 
 
-name = "add_aws_roles"
-url = 'https://github.com/ImmobilienScout24/add_aws_roles'
+name = "afp_ressource_maker"
+url = 'https://github.com/ImmobilienScout24/afp_ressource_maker'
 license = 'Apache License 2.0'
-default_task = "publish"
+default_task = ['clean', 'analyze', 'publish']
 
 
 @init
@@ -29,7 +29,9 @@ def set_properties(project):
 def set_properties_for_teamcity_builds(project):
     import os
     project.set_property('teamcity_output', True)
-    project.version = '%s-%s' % (project.version, os.environ.get('BUILD_NUMBER', 0))
+    project.version = '%s-%s' % (project.version,
+                                 os.environ.get('BUILD_NUMBER', 0))
     project.default_task = ['clean', 'install_build_dependencies', 'publish']
-    project.set_property('install_dependencies_index_url', os.environ.get('PYPIPROXY_URL'))
+    project.set_property('install_dependencies_index_url',
+                         os.environ.get('PYPIPROXY_URL'))
     project.get_property('distutils_commands').append('bdist_rpm')

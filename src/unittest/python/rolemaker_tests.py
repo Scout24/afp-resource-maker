@@ -5,14 +5,14 @@ import boto
 import unittest2 as unittest
 
 from mock import patch, Mock
-from add_aws_roles import (RoleMaker,
-                           LimitExceededException,
-                           CanNotContinueException)
+from afp_ressource_maker import (RoleMaker,
+                                 LimitExceededException,
+                                 CanNotContinueException)
 
 
 class TestRoleMaker(unittest.TestCase):
     def setUp(self):
-        self.patcher = patch('add_aws_roles.RoleMaker._boto_connect')
+        self.patcher = patch('afp_ressource_maker.RoleMaker._boto_connect')
         self.mock_boto_connect = self.patcher.start()
         self.mock_boto_connection = Mock()
         self.mock_boto_connect.return_value = self.mock_boto_connection
