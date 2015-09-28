@@ -44,7 +44,7 @@ class RoleMaker(object):
         except boto.exception.NoAuthHandlerFound, exc:
             raise CanNotContinueException(exc)
 
-    def add_policy(self, role_name):
+    def _add_policy(self, role_name):
         """Add policy document to given role"""
         try:
             self.boto_connection.put_role_policy(role_name,
@@ -54,7 +54,7 @@ class RoleMaker(object):
             message = "Cannot add inline policy to role: %s" % exc.message
             raise CanNotContinueException(message)
 
-    def add_trust_relationship(self, role_name):
+    def _add_trust_relationship(self, role_name):
         """Add trust relationship to given role"""
         try:
             self.boto_connection.update_assume_role_policy(
@@ -63,7 +63,7 @@ class RoleMaker(object):
             message = "Cannot add trust relationship to role: %s" % exc.message
             raise CanNotContinueException(message)
 
-    def create_role(self, role_name):
+    def _create_role(self, role_name):
         """Add Role to AWS"""
         try:
             self.boto_connection.create_role(role_name)
@@ -80,6 +80,7 @@ class RoleMaker(object):
 
     def put_role(self, role_name):
         """Generate Role with Trust relationship and policy"""
-        self.create_role(role_name)
-        self.add_trust_relationship(role_name)
-        self.add_policy(role_name)
+        prefixed_role_name = '{0}{1}'.format(self.prefix, role_name)
+        self._create_role(prefixed_role_name)
+        self._add_trust_relationship(prefixed_role_name)
+        self._add_policy(prefixed_role_name)

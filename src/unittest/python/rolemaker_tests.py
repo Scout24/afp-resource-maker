@@ -6,7 +6,6 @@ import unittest2 as unittest
 
 from mock import patch, Mock
 from add_aws_roles import (RoleMaker,
-                           AWSErrorException,
                            LimitExceededException,
                            CanNotContinueException)
 
@@ -60,7 +59,7 @@ class TestRoleMaker(unittest.TestCase):
 
 class TestCreateRole(TestRoleMaker):
     def test_create_role_should_call_boto_create_role(self):
-        self.rolemaker.create_role(self.role_name)
+        self.rolemaker._create_role(self.role_name)
         self.mock_boto_connection.create_role.\
             assert_called_once_with(self.role_name)
 
@@ -68,27 +67,27 @@ class TestCreateRole(TestRoleMaker):
         error_dict = {'Error': {"Code": "EntityAlreadyExists"}}
         self.mock_boto_connection.create_role.side_effect = \
             [boto.exception.BotoServerError('', '', error_dict)]
-        self.rolemaker.create_role(self.role_name)
+        self.rolemaker._create_role(self.role_name)
 
     def test_create_role_should_raise_exception_on_limit_exceeded(self):
         error_dict = {'Error': {"Code": "LimitExceeded"}}
         self.mock_boto_connection.create_role.side_effect = \
             [boto.exception.BotoServerError('', '', error_dict)]
         self.assertRaises(LimitExceededException,
-                          self.rolemaker.create_role,
+                          self.rolemaker._create_role,
                           self.role_name)
 
     def test_create_role_should_raise_exception_on_other_exceptions(self):
         self.mock_boto_connection.create_role.side_effect = \
             [boto.exception.BotoServerError('', '', '')]
         self.assertRaises(CanNotContinueException,
-                          self.rolemaker.create_role,
+                          self.rolemaker._create_role,
                           self.role_name)
 
 
 class TestAddTrustRelationship(TestRoleMaker):
     def test_add_trust_relationship_should_call_update_assume_role_policy(self):
-        self.rolemaker.add_trust_relationship(self.role_name)
+        self.rolemaker._add_trust_relationship(self.role_name)
         self.mock_boto_connection.update_assume_role_policy.\
             assert_called_once_with(self.role_name, self.trust_policy_document)
 
@@ -96,13 +95,13 @@ class TestAddTrustRelationship(TestRoleMaker):
         self.mock_boto_connection.update_assume_role_policy.side_effect = \
             [boto.exception.BotoServerError('', '', '')]
         self.assertRaises(CanNotContinueException,
-                          self.rolemaker.add_trust_relationship,
+                          self.rolemaker._add_trust_relationship,
                           self.role_name)
 
 
 class TestAddPolicy(TestRoleMaker):
     def test_add_policy_should_call_put_role_policy(self):
-        self.rolemaker.add_policy(self.role_name)
+        self.rolemaker._add_policy(self.role_name)
         self.mock_boto_connection.put_role_policy.\
             assert_called_once_with(self.role_name,
                                     self.policy_name,
@@ -112,5 +111,5 @@ class TestAddPolicy(TestRoleMaker):
         self.mock_boto_connection.put_role_policy.side_effect = \
             [boto.exception.BotoServerError('', '', '')]
         self.assertRaises(CanNotContinueException,
-                          self.rolemaker.add_policy,
+                          self.rolemaker._add_policy,
                           self.role_name)
