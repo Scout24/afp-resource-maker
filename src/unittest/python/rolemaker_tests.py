@@ -5,7 +5,10 @@ import boto
 import unittest2 as unittest
 
 from mock import patch, Mock
-from add_aws_roles import RoleMaker, AWSErrorException, LimitExceededException
+from add_aws_roles import (RoleMaker,
+                           AWSErrorException,
+                           LimitExceededException,
+                           CanNotContinueException)
 
 
 class TestRoleMaker(unittest.TestCase):
@@ -27,6 +30,7 @@ class TestRoleMaker(unittest.TestCase):
                 }
             ]}'''
         self.policy_name = 'policy name foobar'
+        self.role_name = 'testrole'
         self.policy_document = '''{
             "Version": "2012-10-17",
             "Statement": [
@@ -43,8 +47,8 @@ class TestRoleMaker(unittest.TestCase):
                 'role': {
                     'prefix': 'foobar_',
                     'trust_policy_document': self.trust_policy_document,
-                    'inline_policy_name': self.policy_name,
-                    'inline_policy_document': self.policy_document,
+                    'policy_name': self.policy_name,
+                    'policy_document': self.policy_document,
                 }
             }
         }
@@ -57,7 +61,7 @@ class TestRoleMaker(unittest.TestCase):
 class TestCreateRole(TestRoleMaker):
     def test_create_role_should_call_boto_create_role(self):
         self.rolemaker.create_role(self.role_name)
-        self.mock_boto_connect.create_role.\
+        self.mock_boto_connection.create_role.\
             assert_called_once_with(self.role_name)
 
     def test_create_role_should_handle_existing_role(self):
@@ -77,7 +81,7 @@ class TestCreateRole(TestRoleMaker):
     def test_create_role_should_raise_exception_on_other_exceptions(self):
         self.mock_boto_connection.create_role.side_effect = \
             [boto.exception.BotoServerError('', '', '')]
-        self.assertRaises(AWSErrorException,
+        self.assertRaises(CanNotContinueException,
                           self.rolemaker.create_role,
                           self.role_name)
 
@@ -91,7 +95,7 @@ class TestAddTrustRelationship(TestRoleMaker):
     def test_add_trust_relationship_should_throw_exception_on_error(self):
         self.mock_boto_connection.update_assume_role_policy.side_effect = \
             [boto.exception.BotoServerError('', '', '')]
-        self.assertRaises(AWSErrorException,
+        self.assertRaises(CanNotContinueException,
                           self.rolemaker.add_trust_relationship,
                           self.role_name)
 
@@ -99,7 +103,7 @@ class TestAddTrustRelationship(TestRoleMaker):
 class TestAddPolicy(TestRoleMaker):
     def test_add_policy_should_call_put_role_policy(self):
         self.rolemaker.add_policy(self.role_name)
-        self.mock_boto_connect.put_role_policy.\
+        self.mock_boto_connection.put_role_policy.\
             assert_called_once_with(self.role_name,
                                     self.policy_name,
                                     self.policy_document)
@@ -107,6 +111,6 @@ class TestAddPolicy(TestRoleMaker):
     def test_add_policy_should_throw_exception_on_error(self):
         self.mock_boto_connection.put_role_policy.side_effect = \
             [boto.exception.BotoServerError('', '', '')]
-        self.assertRaises(AWSErrorException,
+        self.assertRaises(CanNotContinueException,
                           self.rolemaker.add_policy,
                           self.role_name)

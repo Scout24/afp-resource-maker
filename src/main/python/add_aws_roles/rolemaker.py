@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import json
 import traceback
 
 import boto
@@ -31,14 +30,16 @@ class RoleMaker(object):
         self.prefix = configuration['aws']['role']['prefix']
         self.trust_policy_document = \
             configuration['aws']['role']['trust_policy_document']
-        self.boto_connection = None
+        self.policy_name = configuration['aws']['role']['policy_name']
+        self.policy_document = configuration['aws']['role']['policy_document']
         access_key_id = configuration['aws']['access_key_id']
         secret_access_key = configuration['aws']['secret_access_key']
-        self._boto_connect(access_key_id, secret_access_key)
+        self.boto_connection = self._boto_connect(access_key_id,
+                                                  secret_access_key)
 
     def _boto_connect(self, access_key_id, secret_access_key):
         try:
-            self.boto_connection = boto.connect_iam(
+            return boto.connect_iam(
                 aws_access_key_id=access_key_id,
                 aws_secret_access_key=secret_access_key)
         except boto.exception.NoAuthHandlerFound, exc:
@@ -46,14 +47,19 @@ class RoleMaker(object):
 
     def add_policy(self, role_name):
         """Add policy document to given role"""
-        pass
+        try:
+            self.boto_connection.put_role_policy(role_name,
+                                                 self.policy_name,
+                                                 self.policy_document)
+        except boto.exception.BotoServerError as exc:
+            message = "Cannot add inline policy to role: %s" % exc.message
+            raise CanNotContinueException(message)
 
     def add_trust_relationship(self, role_name):
         """Add trust relationship to given role"""
         try:
             self.boto_connection.update_assume_role_policy(
-                role_name,
-                json.dumps(self.trust_policy))
+                role_name, self.trust_policy_document)
         except boto.exception.BotoServerError as exc:
             message = "Cannot add trust relationship to role: %s" % exc.message
             raise CanNotContinueException(message)
