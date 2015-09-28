@@ -7,6 +7,12 @@ from webtest import TestApp
 import afp_ressource_maker.wsgi as wsgi_api
 
 
-class WsgiApiTests(TestCase):
+class BaseWsgiApiTests(TestCase):
     def setUp(self):
         self.app = TestApp(wsgi_api.get_webapp())
+
+
+class WsgiApiTests(BaseWsgiApiTests):
+    def test_should_make_role(self):
+        result = self.app.get('/role/testrole')
+        self.assertEqual(result.status_int, 200)
