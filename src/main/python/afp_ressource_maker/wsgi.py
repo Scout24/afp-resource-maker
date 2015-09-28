@@ -27,6 +27,12 @@ def make_role(rolename):
     pass
 
 
+@route('/status')
+def status():
+    """Return status page for monitoring"""
+    return {"status": "200", "message": "OK"}
+
+
 def get_webapp():
     """Give back the bottle default_app, for direct use in wsgi scripts"""
     return default_app()

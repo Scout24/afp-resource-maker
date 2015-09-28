@@ -14,5 +14,10 @@ class BaseWsgiApiTests(TestCase):
 
 class WsgiApiTests(BaseWsgiApiTests):
     def test_should_make_role(self):
-        result = self.app.get('/role/testrole')
+        result = self.app.put('/role/testrole')
         self.assertEqual(result.status_int, 200)
+
+    def test_status_good_case(self):
+        result = self.app.get('/status')
+        expected_json = {"status": "200", "message": "OK"}
+        self.assertEqual(result.json, expected_json)
