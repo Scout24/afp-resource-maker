@@ -28,7 +28,7 @@ def main():
     config = yaml_load(arguments['--config'])
     try:
         rolemaker = RoleMaker(config)
-        rolemaker.put_role(arguments['ROLE'])
+        rolemaker.make_role(arguments['ROLE'])
     except CanNotContinueException as error:
         print >> sys.stderr, error
         sys.exit(1)

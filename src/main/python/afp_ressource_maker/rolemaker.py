@@ -37,6 +37,7 @@ class RoleMaker(object):
                                                   secret_access_key)
 
     def _boto_connect(self, access_key_id, secret_access_key):
+        """Establish a boto iam connection and return the connection object"""
         try:
             return boto.connect_iam(
                 aws_access_key_id=access_key_id,
@@ -78,7 +79,7 @@ class RoleMaker(object):
             else:
                 raise CanNotContinueException(traceback.format_exc())
 
-    def put_role(self, role_name):
+    def make_role(self, role_name):
         """Generate Role with Trust relationship and policy"""
         prefixed_role_name = '{0}{1}'.format(self.prefix, role_name)
         self._create_role(prefixed_role_name)

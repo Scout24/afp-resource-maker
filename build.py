@@ -8,7 +8,7 @@ use_plugin("python.coverage")
 use_plugin("python.distutils")
 
 
-name = "afp_ressource_maker"
+name = 'afp_ressource_maker'
 url = 'https://github.com/ImmobilienScout24/afp_ressource_maker'
 license = 'Apache License 2.0'
 default_task = ['clean', 'analyze', 'publish']
@@ -16,11 +16,12 @@ default_task = ['clean', 'analyze', 'publish']
 
 @init
 def set_properties(project):
-    project.build_depends_on("unittest2")
-    project.build_depends_on("mock")
-    project.depends_on("boto")
-    project.depends_on("requests")
-    project.depends_on("docopt")
+    project.build_depends_on('unittest2')
+    project.build_depends_on('mock')
+    project.build_depends_on('webtest')
+    project.depends_on('boto')
+    project.depends_on('requests')
+    project.depends_on('docopt')
     project.set_property('flake8_include_test_sources', True)
     project.set_property('flake8_break_build', True)
 
