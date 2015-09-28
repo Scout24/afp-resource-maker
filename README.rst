@@ -1,12 +1,28 @@
-add_aws_roles
+===================
+afp-ressource-maker
+===================
+
+Create ressources on aws, which are needed by afp-core. For this you have a
+commandline tool and a *wsgi* endpoint.
+
+Configuration
 =============
 
-Add roles to AWS.
+By default the configuration directory points to ``/etc/afp-ressource-maker``.
+For testing purposes you are able to override this by using the ``--config``
+switch on the commandline tool.
 
-A utility script.
+Apache
+------
+For the wsgi endpoint you can use e.g. apache. The configuration part could
+look like this:
+
+.. code-block:: apache
+
+    WSGIScriptAlias /api/latest/ressources
 
 Licence
--------
+=======
 
 Copyright 2015 Immobilienscout24 GmbH
 
