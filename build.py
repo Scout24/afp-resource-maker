@@ -19,11 +19,13 @@ default_task = ['clean', 'analyze', 'publish']
 def set_properties(project):
     project.build_depends_on('unittest2')
     project.build_depends_on('mock')
+    project.build_depends_on('moto')
     project.build_depends_on('webtest')
     project.depends_on('boto')
     project.depends_on('bottle')
     project.depends_on('requests')
     project.depends_on('docopt')
+    project.depends_on('yamlreader')
     project.set_property('flake8_include_test_sources', True)
     project.set_property('flake8_break_build', True)
     project.install_file('/var/www/afp-ressource-maker/', 'wsgi/api.wsgi')

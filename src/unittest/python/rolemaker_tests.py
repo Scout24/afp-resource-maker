@@ -40,15 +40,13 @@ class TestRoleMaker(unittest.TestCase):
                 }
             ]}'''
         self.configuration = {
-            'aws': {
-                'access_key_id': None,
-                'secret_access_key': None,
-                'role': {
-                    'prefix': 'foobar_',
-                    'trust_policy_document': self.trust_policy_document,
-                    'policy_name': self.policy_name,
-                    'policy_document': self.policy_document,
-                }
+            'access_key_id': None,
+            'secret_access_key': None,
+            'role': {
+                'prefix': 'foobar_',
+                'trust_policy_document': self.trust_policy_document,
+                'policy_name': self.policy_name,
+                'policy_document': self.policy_document,
             }
         }
         self.rolemaker = RoleMaker(self.configuration)
