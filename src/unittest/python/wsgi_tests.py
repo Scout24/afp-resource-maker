@@ -9,7 +9,9 @@ import afp_ressource_maker.wsgi as wsgi_api
 
 class BaseWsgiApiTests(TestCase):
     def setUp(self):
-        self.app = TestApp(wsgi_api.get_webapp())
+        environment = dict(CONFIG_PATH='/etc/afp-ressource-maker')
+        self.app = TestApp(wsgi_api.get_webapp(),
+                           extra_environ=environment)
 
 
 class WsgiApiTests(BaseWsgiApiTests):

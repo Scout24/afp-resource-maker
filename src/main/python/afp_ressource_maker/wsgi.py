@@ -4,7 +4,10 @@
 import traceback
 
 from functools import wraps
-from bottle import route, abort, put, default_app
+from yamlreader import yaml_load
+from bottle import route, abort, request, put, default_app
+
+from afp_ressource_maker import RoleMaker
 
 
 def with_exception_handling(old_function):
@@ -24,7 +27,10 @@ def with_exception_handling(old_function):
 @with_exception_handling
 def make_role(rolename):
     """Create a role and assign needed policies and trusted entities"""
-    pass
+    config = yaml_load(request.environ.get('CONFIG_PATH'))
+    rolemaker = RoleMaker(config)
+    rolemaker.make_role(rolename)
+    return
 
 
 @route('/status')
