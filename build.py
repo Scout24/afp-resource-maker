@@ -29,6 +29,7 @@ def set_properties(project):
     project.set_property('flake8_include_test_sources', True)
     project.set_property('flake8_break_build', True)
     project.install_file('/var/www/afp-ressource-maker/', 'wsgi/api.wsgi')
+    project.set_property('copy_resources_target', '$dir_dist')
     project.get_property('copy_resources_glob').extend(['wsgi/*'])
 
 
