@@ -26,13 +26,13 @@ class RoleMaker(object):
     """Create a role with policies to allow cross account operations"""
 
     def __init__(self, configuration):
-        self.prefix = configuration['aws']['role']['prefix']
+        self.prefix = configuration['role']['prefix']
         self.trust_policy_document = \
-            configuration['aws']['role']['trust_policy_document']
-        self.policy_name = configuration['aws']['role']['policy_name']
-        self.policy_document = configuration['aws']['role']['policy_document']
-        access_key_id = configuration['aws']['access_key_id']
-        secret_access_key = configuration['aws']['secret_access_key']
+            configuration['role']['trust_policy_document']
+        self.policy_name = configuration['role']['policy_name']
+        self.policy_document = configuration['role']['policy_document']
+        access_key_id = configuration['access_key_id']
+        secret_access_key = configuration['secret_access_key']
         self.boto_connection = self._boto_connect(access_key_id,
                                                   secret_access_key)
 
