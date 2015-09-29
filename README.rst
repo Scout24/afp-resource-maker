@@ -34,48 +34,48 @@ deny everything within the main account. Here is an example of the settings:
 
     role:
         prefix: foobar_
-    trust_policy_document: |
-        {
-            "Version": "2012-10-17",
-            "Statement": [
+        trust_policy_document: |
+            {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Sid": "",
+                        "Effect": "Allow",
+                        "Principal": {
+                            "AWS": "arn:aws:iam::1234567890:user/my-federation-user"
+                        },
+                        "Action": "sts:AssumeRole"
+                    }
+                ]
+            }
+        policy_name: allow_all_except_own_account
+        policy_document: |
+            {
+                "Version": "2012-10-17",
+                "Statement": [
                 {
                     "Sid": "",
                     "Effect": "Allow",
-                    "Principal": {
-                        "AWS": "arn:aws:iam::1234567890:user/my-federation-user"
-                    },
-                    "Action": "sts:AssumeRole"
-                }
-            ]
-        }
-    policy_name: allow_all_except_own_account
-    policy_document: |
-        {
-            "Version": "2012-10-17",
-            "Statement": [
-            {
-                "Sid": "",
-                "Effect": "Allow",
-                "Action": [
-                    "*"
-                ],
-                "Resource": [
-                    "*"
-                ]
-            },
-            {
-                "Sid": "",
-                "Effect": "Deny",
-                "Action": [
-                    "*"
-                ],
-                "Resource": [
-                    "arn:aws:iam::1234567890:*",
-                    "arn:aws:ec2:*:1234567890:*",
-                    "... and so on ..."
-                ]
-            }]
-        }
+                    "Action": [
+                        "*"
+                    ],
+                    "Resource": [
+                        "*"
+                    ]
+                },
+                {
+                    "Sid": "",
+                    "Effect": "Deny",
+                    "Action": [
+                        "*"
+                    ],
+                    "Resource": [
+                        "arn:aws:iam::1234567890:*",
+                        "arn:aws:ec2:*:1234567890:*",
+                        "... and so on ..."
+                    ]
+                }]
+            }
 
 For a complete list use the policy generator from aws.
 
