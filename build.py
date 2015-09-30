@@ -9,7 +9,7 @@ use_plugin('python.distutils')
 use_plugin('copy_resources')
 
 
-name = 'afp_resource_maker'
+name = 'afp-resource-maker'
 url = 'https://github.com/ImmobilienScout24/afp_resource_maker'
 license = 'Apache License 2.0'
 default_task = ['clean', 'analyze', 'publish']
