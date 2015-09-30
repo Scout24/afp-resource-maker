@@ -15,6 +15,10 @@ import afp_resource_maker.wsgi as wsgi_api
 
 class BaseWsgiApiTests(TestCase):
     def setUp(self):
+        # https://github.com/gabrielfalcao/HTTPretty/issues/122
+        self.restore_proxy = os.environ.get('http_proxy')
+        if self.restore_proxy is not None:
+            del os.environ['http_proxy']
         self.config_path = tempfile.mkdtemp(prefix='afp-resource-maker-tests-')
         auth_config = {
             'access_key_id': 'AKIAIOSFODNN7EXAMPLE',
@@ -34,6 +38,9 @@ class BaseWsgiApiTests(TestCase):
         self.app = TestApp(wsgi_api.get_webapp(), extra_environ=environment)
 
     def tearDown(self):
+        # https://github.com/gabrielfalcao/HTTPretty/issues/122
+        if self.restore_proxy:
+            os.environ['http_proxy'] = self.restore_proxy
         shutil.rmtree(self.config_path)
 
     @staticmethod
