@@ -1,14 +1,14 @@
 ===================
-afp-ressource-maker
+afp-resource-maker
 ===================
 
-Create ressources on aws, which are needed by afp-core. For this you have a
+Create resources on aws, which are needed by afp-core. For this you have a
 commandline tool and a *wsgi* endpoint.
 
 Configuration
 =============
 
-By default the configuration directory points to ``/etc/afp-ressource-maker``.
+By default the configuration directory points to ``/etc/afp-resource-maker``.
 For testing purposes you are able to override this by using the ``--config``
 switch on the commandline tool.
 
@@ -90,10 +90,10 @@ look like this:
 
 .. code-block:: apache
 
-    <Location /api/latest/ressources>
-        SetEnv CONFIG_PATH "/etc/afp-ressource-maker"
+    <Location /api/latest/resources>
+        SetEnv CONFIG_PATH "/etc/afp-resource-maker"
     </Location>
-    WSGIScriptAlias /api/latest/ressources
+    WSGIScriptAlias /api/latest/resources
 
 The ``CONFIG_PATH`` is important, else the script is unable to find its
 configuration.
