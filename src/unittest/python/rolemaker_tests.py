@@ -6,8 +6,8 @@ import unittest2 as unittest
 
 from mock import patch, Mock
 from afp_resource_maker import (RoleMaker,
-                                 LimitExceededException,
-                                 CanNotContinueException)
+                                LimitExceededException,
+                                CanNotContinueException)
 
 
 class TestRoleMaker(unittest.TestCase):
