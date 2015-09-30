@@ -10,12 +10,12 @@ from moto import mock_iam
 from webtest import TestApp
 from unittest2 import TestCase
 
-import afp_ressource_maker.wsgi as wsgi_api
+import afp_resource_maker.wsgi as wsgi_api
 
 
 class BaseWsgiApiTests(TestCase):
     def setUp(self):
-        self.config_path = tempfile.mkdtemp(prefix='afp-ressource-maker-tests-')
+        self.config_path = tempfile.mkdtemp(prefix='afp-resource-maker-tests-')
         auth_config = {
             'access_key_id': 'AKIAIOSFODNN7EXAMPLE',
             'secret_access_key': 'aJalrXUtnFEMI/K7MDENG/bPxRfiCYzEXAMPLEKEY'

@@ -7,7 +7,7 @@ from functools import wraps
 from yamlreader import yaml_load
 from bottle import route, abort, request, put, default_app
 
-from afp_ressource_maker import RoleMaker
+from afp_resource_maker import RoleMaker
 
 
 def with_exception_handling(old_function):

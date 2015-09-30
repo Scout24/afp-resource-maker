@@ -3,15 +3,15 @@
 # vim :set ft=python:
 
 """
-Command line tool to generate afp ressources.
+Command line tool to generate afp resources.
 
 Usage:
-    afp-ressource-maker --config=<file_path> ROLE
+    afp-resource-maker --config=<file_path> ROLE
 
 Options:
   -h --help               Show this
   --config=<path>         Path to configuation files
-                          [default: /etc/afp-ressource-maker]
+                          [default: /etc/afp-resource-maker]
 """
 
 import sys
@@ -19,7 +19,7 @@ import sys
 from docopt import docopt
 from yamlreader import yaml_load
 
-from afp_ressource_maker import RoleMaker, CanNotContinueException
+from afp_resource_maker import RoleMaker, CanNotContinueException
 
 
 def main():

@@ -9,8 +9,8 @@ use_plugin('python.distutils')
 use_plugin('copy_resources')
 
 
-name = 'afp_ressource_maker'
-url = 'https://github.com/ImmobilienScout24/afp_ressource_maker'
+name = 'afp_resource_maker'
+url = 'https://github.com/ImmobilienScout24/afp_resource_maker'
 license = 'Apache License 2.0'
 default_task = ['clean', 'analyze', 'publish']
 
@@ -28,7 +28,7 @@ def set_properties(project):
     project.depends_on('yamlreader')
     project.set_property('flake8_include_test_sources', True)
     project.set_property('flake8_break_build', True)
-    project.install_file('/var/www/afp-ressource-maker/', 'wsgi/api.wsgi')
+    project.install_file('/var/www/afp-resource-maker/', 'wsgi/api.wsgi')
     project.set_property('copy_resources_target', '$dir_dist')
     project.get_property('copy_resources_glob').extend(['wsgi/*'])
 
