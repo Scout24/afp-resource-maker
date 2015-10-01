@@ -53,7 +53,7 @@ class WsgiApiTests(BaseWsgiApiTests):
     @mock_iam
     def test_should_make_role(self):
         result = self.app.put('/role/testrole')
-        self.assertEqual(result.status_int, 200)
+        self.assertEqual(result.status_int, 201)
 
     def test_status_good_case(self):
         result = self.app.get('/status')

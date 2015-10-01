@@ -39,7 +39,7 @@ def make_role(rolename):
     config = yaml_load(request.environ.get('CONFIG_PATH'))
     rolemaker = RoleMaker(config)
     rolemaker.make_role(rolename)
-    return
+    return HTTPResponse(status=201)
 
 
 @route('/status')
