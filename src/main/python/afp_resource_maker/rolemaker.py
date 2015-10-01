@@ -10,10 +10,6 @@ class LimitExceededException(Exception):
     pass
 
 
-class AWSErrorException(Exception):
-    pass
-
-
 class CanNotContinueException(Exception):
     pass
 

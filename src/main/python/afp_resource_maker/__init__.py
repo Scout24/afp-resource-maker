@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 
 from .rolemaker import (RoleMaker,
-                        AWSErrorException,
+                        InvalidClientTokenIdException,
                         LimitExceededException,
                         CanNotContinueException)
 
 __all__ = [
     'RoleMaker',
-    'AWSErrorException',
+    'InvalidClientTokenIdException',
     'LimitExceededException',
     'CanNotContinueException']
