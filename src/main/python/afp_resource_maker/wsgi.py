@@ -5,9 +5,12 @@ import traceback
 
 from functools import wraps
 from yamlreader import yaml_load
-from bottle import route, abort, request, put, default_app
+from bottle import route, abort, request, put, HTTPResponse, default_app
 
-from afp_resource_maker import RoleMaker
+from afp_resource_maker import (RoleMaker,
+                                InvalidClientTokenIdException,
+                                LimitExceededException,
+                                CanNotContinueException)
 
 
 def with_exception_handling(old_function):
@@ -16,9 +19,15 @@ def with_exception_handling(old_function):
     def new_function(*args, **kwargs):
         try:
             result = old_function(*args, **kwargs)
+        except InvalidClientTokenIdException as error:
+            abort(code=401, text=error)
+        except LimitExceededException as error:
+            abort(code=509, text=error)
+        except CanNotContinueException as error:
+            abort(code=502, text=error)
         except Exception:
             message = traceback.format_exc()
-            abort(500, 'Exception caught {0}'.format(message))
+            abort(code=500, text='Exception caught {0}'.format(message))
         return result
     return new_function
 
