@@ -6,8 +6,11 @@ import yaml
 import shutil
 import tempfile
 
+import boto
+
 from moto import mock_iam
 from webtest import TestApp
+from mock import patch, Mock
 from unittest2 import TestCase
 
 import afp_resource_maker.wsgi as wsgi_api
@@ -15,6 +18,10 @@ import afp_resource_maker.wsgi as wsgi_api
 
 class BaseWsgiApiTests(TestCase):
     def setUp(self):
+        self.patcher = patch('afp_resource_maker.RoleMaker._boto_connect')
+        self.mock_boto_connect = self.patcher.start()
+        self.mock_boto_connection = Mock()
+        self.mock_boto_connect.return_value = self.mock_boto_connection
         # https://github.com/gabrielfalcao/HTTPretty/issues/122
         self.restore_proxy = os.environ.get('http_proxy')
         if self.restore_proxy is not None:
@@ -42,6 +49,7 @@ class BaseWsgiApiTests(TestCase):
         if self.restore_proxy:
             os.environ['http_proxy'] = self.restore_proxy
         shutil.rmtree(self.config_path)
+        self.patcher.stop()
 
     @staticmethod
     def writeyaml(data, yamlfile):
@@ -59,3 +67,18 @@ class WsgiApiTests(BaseWsgiApiTests):
         result = self.app.get('/status')
         expected_json = {"status": "200", "message": "OK"}
         self.assertEqual(result.json, expected_json)
+
+    def test_should_give_401_return_code(self):
+        pass
+
+    def test_should_give_509_return_code(self):
+        self.mock_boto_connection.create_role.side_effect = \
+            [boto.exception.BotoServerError('', '', {'Error': {"Code": "LimitExceeded"}})]
+        result = self.app.put('/role/testrole', expect_errors=True)
+        self.assertEqual(result.status_int, 509)
+
+    def test_should_give_502_return_code(self):
+        pass
+
+    def test_should_give_500_return_code(self):
+        pass
