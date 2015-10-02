@@ -69,7 +69,10 @@ class WsgiApiTests(BaseWsgiApiTests):
         self.assertEqual(result.json, expected_json)
 
     def test_should_give_401_return_code(self):
-        pass
+        self.mock_boto_connection.create_role.side_effect = \
+            [boto.exception.BotoServerError('', '', {'Error': {"Code": "InvalidClientTokenId"}})]
+        result = self.app.put('/role/testrole', expect_errors=True)
+        self.assertEqual(result.status_int, 401)
 
     def test_should_give_509_return_code(self):
         self.mock_boto_connection.create_role.side_effect = \
@@ -78,7 +81,7 @@ class WsgiApiTests(BaseWsgiApiTests):
         self.assertEqual(result.status_int, 509)
 
     def test_should_give_502_return_code(self):
-        pass
-
-    def test_should_give_500_return_code(self):
-        pass
+        self.mock_boto_connection.create_role.side_effect = \
+            [boto.exception.BotoServerError('', '', {'Error': {"Code": "CanNotContinueException"}})]
+        result = self.app.put('/role/testrole', expect_errors=True)
+        self.assertEqual(result.status_int, 502)
