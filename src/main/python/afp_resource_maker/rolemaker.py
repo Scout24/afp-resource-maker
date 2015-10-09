@@ -38,7 +38,7 @@ class RoleMaker(object):
             return boto.connect_iam(
                 aws_access_key_id=access_key_id,
                 aws_secret_access_key=secret_access_key)
-        except boto.exception.NoAuthHandlerFound, exc:
+        except boto.exception.NoAuthHandlerFound as exc:
             raise CanNotContinueException(exc)
 
     def _add_policy(self, role_name):
