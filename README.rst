@@ -1,6 +1,14 @@
 ===================
 afp-resource-maker
 ===================
+.. image:: https://travis-ci.org/ImmobilienScout24/afp-resource-maker.png?branch=master
+   :alt: Travis build status image
+   :align: left
+   :target: https://travis-ci.org/ImmobilienScout24/afp-resource-maker
+
+.. image:: https://coveralls.io/repos/ImmobilienScout24/afp-resource-maker/badge.png?branch=master
+    :alt: Coverage status
+    :target: https://coveralls.io/r/ImmobilienScout24/afp-resource-maker?branch=master
 
 Create resources on aws, which are needed by afp-core. For this you have a
 commandline tool and a *wsgi* endpoint.
