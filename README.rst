@@ -10,19 +10,22 @@ afp-resource-maker
     :alt: Coverage status
     :target: https://coveralls.io/r/ImmobilienScout24/afp-resource-maker?branch=master
 
-Create resources on aws, which are needed by afp-core. For this you have a
-commandline tool and a *wsgi* endpoint.
+Creates an IAM role in AWS, as needed by `afp-core <https://github.com/ImmobilienScout24/afp-core>`_.
+
+This role includes a **trust policy** so that the AFP can assume the role. It also includes a **policy document** that describes what the role may or may not do. Both policies are configurable via a config file.
+
+The functionality is available as a commandline tool and a *wsgi* endpoint.
 
 Configuration
 =============
 
-By default the configuration directory points to ``/etc/afp-resource-maker``.
+By default, the configuration directory points to ``/etc/afp-resource-maker``.
 For testing purposes you are able to override this by using the ``--config``
 switch on the commandline tool.
 
 Credentials
 -----------
-Needed to make the api calls to aws. e.g. create a dedicated user for this:
+These are the credentials that the afp-resource-maker uses to make the API calls to AWS. You should create a dedicated IAM user for this:
 
 .. code-block:: yaml
 
@@ -31,7 +34,7 @@ Needed to make the api calls to aws. e.g. create a dedicated user for this:
 
 Role
 ----
-The role settings especially the policies are important for the machine auth
+The role settings, especially the policies, are important for the machine auth
 functionality of `afp-core <https://github.com/ImmobilienScout24/afp-core>`_.
 
 To make a cross account permission granting possible you need a trusted entity
@@ -108,7 +111,7 @@ Setting the ``CONFIG_PATH`` is optional, it defaults to ``/etc/afp-resource-make
 Licence
 =======
 
-Copyright 2015 Immobilien Scout GmbH
+Copyright 2016 Immobilien Scout GmbH
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 this file except in compliance with the License. You may obtain a copy of the
