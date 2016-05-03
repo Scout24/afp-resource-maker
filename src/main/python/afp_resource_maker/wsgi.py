@@ -33,7 +33,8 @@ def with_exception_handling(old_function):
 
 
 def get_config():
-    return yaml_load(request.environ.get('CONFIG_PATH'))
+    config_path = request.environ.get('CONFIG_PATH', '/etc/afp-resource-maker')
+    return yaml_load(config_path)
 
 
 @put('/role/<rolename>')

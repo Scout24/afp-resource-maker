@@ -103,8 +103,7 @@ look like this:
     </Location>
     WSGIScriptAlias /api/latest/resources
 
-The ``CONFIG_PATH`` is important, else the script is unable to find its
-configuration.
+Setting the ``CONFIG_PATH`` is optional, it defaults to ``/etc/afp-resource-maker``.
 
 Licence
 =======

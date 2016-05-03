@@ -94,3 +94,12 @@ class WsgiApiTests(BaseWsgiApiTests):
             [boto.exception.BotoServerError('', '', {'Error': {"Code": "CanNotContinueException"}})]
         result = self.app.put('/role/testrole', expect_errors=True)
         self.assertEqual(result.status_int, 502)
+
+    @patch('afp_resource_maker.wsgi.yaml_load')
+    def test_load_config_uses_default_path(self, mock_yaml_load):
+        env_without_config_path = {}
+        self.app = TestApp(wsgi_api.get_webapp(), extra_environ=env_without_config_path)
+
+        wsgi_api.get_config()
+
+        mock_yaml_load.assert_called_with('/etc/afp-resource-maker')
