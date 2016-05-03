@@ -85,7 +85,7 @@ deny everything within the main account. Here is an example of the settings:
                 }]
             }
 
-For a complete list use the policy generator from aws.
+For a complete list use the `AWS policy generator <http://awspolicygen.s3.amazonaws.com/policygen.html>`.
 
 The advantage of this setup is, that you are able to create a multiaccount
 setup, where the the other accounts can grant permission on roles from the
