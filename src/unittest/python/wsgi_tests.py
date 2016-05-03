@@ -68,6 +68,15 @@ class WsgiApiTests(BaseWsgiApiTests):
         expected_json = {"status": "200", "message": "OK"}
         self.assertEqual(result.json, expected_json)
 
+    def test_status_bad_case_with_missing_config(self):
+        missing_config = os.path.join(self.config_path, "missing_config.yaml")
+        env_with_wrong_config_path = {'CONFIG_PATH': missing_config}
+        self.app = TestApp(wsgi_api.get_webapp(), extra_environ=env_with_wrong_config_path)
+
+        result = self.app.get('/status', expect_errors=True)
+
+        self.assertEqual(result.status_int, 500)
+
     def test_should_give_401_return_code(self):
         self.mock_boto_connection.create_role.side_effect = \
             [boto.exception.BotoServerError('', '', {'Error': {"Code": "InvalidClientTokenId"}})]
