@@ -32,11 +32,15 @@ def with_exception_handling(old_function):
     return new_function
 
 
+def get_config():
+    return yaml_load(request.environ.get('CONFIG_PATH'))
+
+
 @put('/role/<rolename>')
 @with_exception_handling
 def make_role(rolename):
     """Create a role and assign needed policies and trusted entities"""
-    config = yaml_load(request.environ.get('CONFIG_PATH'))
+    config = get_config()
     rolemaker = RoleMaker(config)
     rolemaker.make_role(rolename)
     return HTTPResponse(status=201)
@@ -45,6 +49,7 @@ def make_role(rolename):
 @route('/status')
 def status():
     """Return status page for monitoring"""
+    get_config()
     return {"status": "200", "message": "OK"}
 
 
